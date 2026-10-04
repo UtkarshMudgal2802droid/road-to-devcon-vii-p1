@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portable AI Preferences - Devcon 7 Problem 1
 
-## Getting Started
+This project reads AI preference settings directly from an ENS name's text records on the Sepolia testnet and uses them to safely steer an LLM assistant.
 
-First, run the development server:
+## Documented Preference Format
+The application checks for the following ENS text record keys. If a key is unset or contains an invalid value, it safely falls back to a default.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+| ENS Text Record Key | Allowed Values | Default | Description |
+| --- | --- | --- | --- |
+| `ai.pref.language` | `en`, `pt`, `es` | `en` | The language the AI should reply in (English, Portuguese, Spanish). |
+| `ai.pref.length` | `short`, `medium`, `long` | `medium` | The preferred verbosity of the response. |
+| `ai.pref.level` | `simple`, `standard`, `expert` | `standard` | The complexity of the explanation. |
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Sepolia Test Names
+We have configured two ENS names on Sepolia with distinct preferences for testing:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **`anadyslexic.eth`**
+   - `ai.pref.language`: `pt` (Portuguese)
+   - `ai.pref.length`: `short`
+   - `ai.pref.level`: `simple`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **`bobexpert.eth`**
+   - `ai.pref.language`: `en` (English)
+   - `ai.pref.length`: `long`
+   - `ai.pref.level`: `expert`
 
-## Learn More
+*(Note: If the names above are not resolvable on your current RPC, the app will gracefully fallback to the defaults: English, Medium, Standard).*
 
-To learn more about Next.js, take a look at the following resources:
+## How to Run
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Clone the repo and install dependencies:
+   ```bash
+   pnpm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Create a `.env` file (see `.env.example`) and add your LLM provider credentials.
+   ```
+   OPENAI_API_KEY="sk-..."
+   OPENAI_BASE_URL="https://api.openai.com/v1"
+   MODEL_ID="gpt-4o-mini"
+   NEXT_PUBLIC_RPC_URL="https://sepolia.gateway.tenderly.co"
+   ```
 
-## Deploy on Vercel
+3. Run the development server:
+   ```bash
+   pnpm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Navigate to `http://localhost:3000` and enter an ENS name and a question.
