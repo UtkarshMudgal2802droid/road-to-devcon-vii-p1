@@ -9,11 +9,14 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [appliedPrefs, setAppliedPrefs] = useState<{langKey: string, lengthKey: string, levelKey: string} | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setAnswer("");
+    setAppliedPrefs(null);
 
     try {
       const res = await fetch("/api/ask", {
@@ -28,6 +31,7 @@ export default function Home() {
       }
 
       setAnswer(data.answer);
+      setAppliedPrefs(data.appliedPrefs);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -90,9 +94,18 @@ export default function Home() {
         {answer && (
           <div className="mt-8 p-6 bg-gray-900 border border-gray-700 rounded-lg">
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3">Answer</h2>
-            <div className="text-gray-200 whitespace-pre-wrap leading-relaxed">
+            <div className="text-gray-200 whitespace-pre-wrap leading-relaxed mb-6">
               {answer}
             </div>
+            
+            {appliedPrefs && (
+              <div className="text-xs text-gray-400 p-3 bg-gray-800 rounded border border-gray-700">
+                <span className="font-bold text-gray-300">Applied Preferences:</span> 
+                {' '}Language: <span className="text-blue-400">{appliedPrefs.langKey}</span>, 
+                {' '}Length: <span className="text-blue-400">{appliedPrefs.lengthKey}</span>, 
+                {' '}Level: <span className="text-blue-400">{appliedPrefs.levelKey}</span>
+              </div>
+            )}
           </div>
         )}
       </main>

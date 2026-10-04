@@ -12,7 +12,7 @@ The application checks for the following ENS text record keys. If a key is unset
 | `ai.pref.level` | `simple`, `standard`, `expert` | `standard` | The complexity of the explanation. |
 
 ## Sepolia Test Names
-We have configured two ENS names on Sepolia with distinct preferences for testing:
+(Note: The following are illustrative unverified examples of names and records. We did not independently verify their on-chain state during this review. If they do not resolve, the application safely falls back to defaults.)
 
 1. **`anadyslexic.eth`**
    - `ai.pref.language`: `pt` (Portuguese)
@@ -23,8 +23,6 @@ We have configured two ENS names on Sepolia with distinct preferences for testin
    - `ai.pref.language`: `en` (English)
    - `ai.pref.length`: `long`
    - `ai.pref.level`: `expert`
-
-*(Note: If the names above are not resolvable on your current RPC, the app will gracefully fallback to the defaults: English, Medium, Standard).*
 
 ## How to Run
 

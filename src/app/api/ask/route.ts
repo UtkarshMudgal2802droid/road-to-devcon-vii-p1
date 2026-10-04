@@ -51,13 +51,9 @@ export async function POST(req: NextRequest) {
     let rawLength = null;
     let rawLevel = null;
 
-    try {
-      rawLang = await publicClient.getEnsText({ name: normalizedName, key: "ai.pref.language" });
-      rawLength = await publicClient.getEnsText({ name: normalizedName, key: "ai.pref.length" });
-      rawLevel = await publicClient.getEnsText({ name: normalizedName, key: "ai.pref.level" });
-    } catch {
-      rawLang = null;
-    }
+    try { rawLang = await publicClient.getEnsText({ name: normalizedName, key: "ai.pref.language" }); } catch {}
+    try { rawLength = await publicClient.getEnsText({ name: normalizedName, key: "ai.pref.length" }); } catch {}
+    try { rawLevel = await publicClient.getEnsText({ name: normalizedName, key: "ai.pref.level" }); } catch {}
 
     let langKey: "en" | "pt" | "es" = "en";
     if (rawLang === "pt" || rawLang === "es" || rawLang === "en") {
@@ -96,29 +92,34 @@ ${levelMap[levelKey]}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const aiResponse = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: modelId,
-        messages: [
-          { role: "system", content: systemInstruction },
-          { role: "user", content: question }
-        ]
-      }),
-      signal: controller.signal
-    });
+    let aiResponse;
+    let data;
+    try {
+      aiResponse = await fetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: question }
+          ]
+        }),
+        signal: controller.signal
+      });
 
-    clearTimeout(timeoutId);
+      if (!aiResponse.ok) {
+        return NextResponse.json({ error: "Provider failure" }, { status: 502 });
+      }
 
-    if (!aiResponse.ok) {
-      return NextResponse.json({ error: "Provider failure" }, { status: 502 });
+      data = await aiResponse.json();
+    } finally {
+      clearTimeout(timeoutId);
     }
 
-    const data = await aiResponse.json();
     const answer = data.choices?.[0]?.message?.content || "No response generated.";
 
     return NextResponse.json({ answer, appliedPrefs: { langKey, lengthKey, levelKey } });
